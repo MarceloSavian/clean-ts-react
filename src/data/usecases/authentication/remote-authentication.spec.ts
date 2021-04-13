@@ -52,4 +52,22 @@ describe('RemoteAuthentication', () => {
     const promise = sut.auth(makeAuthParams())
     await expect(promise).rejects.toThrow(new UnexpectedError())
   })
+  test('Should throw UnexpectedError if HttpPostClient returns 404', async () => {
+    const url = faker.internet.url()
+    const { sut, httpPostClientStub } = mockSut(url)
+    httpPostClientStub.response = {
+      statusCode: HttpStatusCode.notFound
+    }
+    const promise = sut.auth(makeAuthParams())
+    await expect(promise).rejects.toThrow(new UnexpectedError())
+  })
+  test('Should throw UnexpectedError if HttpPostClient returns 500', async () => {
+    const url = faker.internet.url()
+    const { sut, httpPostClientStub } = mockSut(url)
+    httpPostClientStub.response = {
+      statusCode: HttpStatusCode.serverError
+    }
+    const promise = sut.auth(makeAuthParams())
+    await expect(promise).rejects.toThrow(new UnexpectedError())
+  })
 })
