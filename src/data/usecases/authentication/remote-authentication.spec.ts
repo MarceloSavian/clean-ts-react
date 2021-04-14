@@ -23,52 +23,47 @@ const mockSut = (url: string): SutTypes => {
 }
 
 describe('RemoteAuthentication', () => {
-  test('Should call HttpPostClient with correct URL', async () => {
+  test('Should call HttpPostClient with correct params', async () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
-    await sut.auth(makeAuthParams())
-    expect(httpPostClientStub.url).toBe(url)
-  })
-  test('Should call HttpPostClient with correct Body', async () => {
-    const url = faker.internet.url()
-    const { sut, httpPostClientStub } = mockSut(url)
+    const postSpy = jest.spyOn(httpPostClientStub, 'post')
     const params = makeAuthParams()
     await sut.auth(params)
-    expect(httpPostClientStub.body).toBe(params)
+    expect(postSpy).toHaveBeenLastCalledWith({ url, body: params })
   })
   test('Should throw InvalidCredentialsError if HttpPostClient returns 401', async () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
-    httpPostClientStub.response = {
+    jest.spyOn(httpPostClientStub, 'post').mockResolvedValueOnce({
       statusCode: HttpStatusCode.unauthorized
-    }
+    })
     const promise = sut.auth(makeAuthParams())
     await expect(promise).rejects.toThrow(new InvalidCredentialsError())
   })
   test('Should throw UnexpectedError if HttpPostClient returns 400', async () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
-    httpPostClientStub.response = {
+    jest.spyOn(httpPostClientStub, 'post').mockResolvedValueOnce({
       statusCode: HttpStatusCode.badRequest
-    }
+    })
     const promise = sut.auth(makeAuthParams())
     await expect(promise).rejects.toThrow(new UnexpectedError())
   })
   test('Should throw UnexpectedError if HttpPostClient returns 404', async () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
-    httpPostClientStub.response = {
+    jest.spyOn(httpPostClientStub, 'post').mockResolvedValueOnce({
       statusCode: HttpStatusCode.notFound
-    }
+    })
     const promise = sut.auth(makeAuthParams())
     await expect(promise).rejects.toThrow(new UnexpectedError())
   })
   test('Should throw UnexpectedError if HttpPostClient returns 500', async () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
-    httpPostClientStub.response = {
+    jest.spyOn(httpPostClientStub, 'post').mockResolvedValueOnce({
       statusCode: HttpStatusCode.serverError
-    }
+    })
     const promise = sut.auth(makeAuthParams())
     await expect(promise).rejects.toThrow(new UnexpectedError())
   })
@@ -76,10 +71,10 @@ describe('RemoteAuthentication', () => {
     const url = faker.internet.url()
     const { sut, httpPostClientStub } = mockSut(url)
     const httpResult = makeAccountModel()
-    httpPostClientStub.response = {
+    jest.spyOn(httpPostClientStub, 'post').mockResolvedValueOnce({
       statusCode: HttpStatusCode.ok,
       body: httpResult
-    }
+    })
     const account = await sut.auth(makeAuthParams())
     expect(account).toEqual(httpResult)
   })

@@ -3,14 +3,15 @@ import { AccountModel } from '@/domain/models/account-model'
 import { AuthenticationParams } from '@/domain/usecases/authentication'
 import { HttpResponse, HttpStatusCode } from '../protocols/http/http-response'
 
+export const mockHttpResponse: HttpResponse<any> = {
+  statusCode: HttpStatusCode.ok
+}
+
 export const mockHttpPostClient = (): HttpPostClient<AuthenticationParams, AccountModel> => {
   class HttpPostClientStub<T, R> implements HttpPostClient<T, R> {
     url?: string
     body?: T
-    response: HttpResponse<R> = {
-      statusCode: HttpStatusCode.ok
-    }
-
+    response = mockHttpResponse
     async post (params: HttpPostParams<T>): Promise<HttpResponse<R>> {
       this.url = params.url
       this.body = params.body
